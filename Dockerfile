@@ -30,12 +30,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
   bcmath
 
 # Install Redis extension
-RUN pecl install redis \
+RUN pecl install redis-6.3.0 \
   && docker-php-ext-enable redis
-
-# Install Xdebug
-RUN pecl install xdebug \
-  && docker-php-ext-enable xdebug
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
