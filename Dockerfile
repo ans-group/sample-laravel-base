@@ -1,5 +1,9 @@
 FROM php:8.4-fpm AS base
 
+# Accept build arguments for user/group IDs
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
   zlib1g-dev \
@@ -36,11 +40,20 @@ RUN pecl install xdebug \
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-#RUN composer install
+# Create user with same UID/GID as host user
+RUN groupadd -g ${GROUP_ID} laravel && \
+    useradd -u ${USER_ID} -g laravel -m -s /bin/bash laravel
 
+# Configure PHP-FPM to listen on port 9000 and run as laravel user
+RUN sed -i 's/listen = 127.0.0.1:9000/listen = 9000/g' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i 's/user = www-data/user = laravel/g' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i 's/group = www-data/group = laravel/g' /usr/local/etc/php-fpm.d/www.conf
 
-# Configure PHP-FPM
-RUN sed -i 's/listen = 127.0.0.1:9000/listen = 9000/g' /usr/local/etc/php-fpm.d/www.conf
+# Set working directory
+WORKDIR /var/www/html
+
+# Switch to non-root user
+USER laravel
 
 EXPOSE 9000
 

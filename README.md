@@ -81,6 +81,32 @@ docker compose logs -f [service]
 docker compose down
 ```
 
+## User Permissions
+
+The PHP-FPM container runs as a user matching your host system's user ID to avoid file permission issues. By default, it uses UID/GID 1000.
+
+To configure for your specific user:
+
+1. Check your user ID:
+   ```bash
+   id -u  # Your user ID
+   id -g  # Your group ID
+   ```
+
+2. Update `.env.docker` with your values:
+   ```env
+   USER_ID=1000
+   GROUP_ID=1000
+   ```
+
+3. Rebuild the app container:
+   ```bash
+   docker compose build app
+   docker compose up -d
+   ```
+
+Files created inside the container will now be owned by your host user, allowing seamless editing without permission problems.
+
 ## Environment Variables
 
 Key Docker-specific settings in `.env`:
@@ -101,6 +127,13 @@ REDIS_PORT=6379
 SESSION_DRIVER=redis
 CACHE_STORE=redis
 QUEUE_CONNECTION=redis
+```
+
+Additional Docker configuration in `.env.docker`:
+
+```env
+USER_ID=1000   # Set to your host user ID (run: id -u)
+GROUP_ID=1000  # Set to your host group ID (run: id -g)
 ```
 
 ## Xdebug
