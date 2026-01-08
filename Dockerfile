@@ -41,13 +41,15 @@ RUN pecl install xdebug \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Create user with same UID/GID as host user
-RUN groupadd -g ${GROUP_ID} laravel && \
-    useradd -u ${USER_ID} -g laravel -m -s /bin/bash laravel
+# Use -o flag to allow non-unique UIDs (useful for Mac/Windows where UID might conflict)
+RUN groupadd -f -g ${GROUP_ID} laravel && \
+  useradd -o -u ${USER_ID} -g laravel -m -s /bin/bash laravel 2>/dev/null || \
+  usermod -u ${USER_ID} -g ${GROUP_ID} laravel
 
 # Configure PHP-FPM to listen on port 9000 and run as laravel user
 RUN sed -i 's/listen = 127.0.0.1:9000/listen = 9000/g' /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i 's/user = www-data/user = laravel/g' /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i 's/group = www-data/group = laravel/g' /usr/local/etc/php-fpm.d/www.conf
+  sed -i 's/user = www-data/user = laravel/g' /usr/local/etc/php-fpm.d/www.conf && \
+  sed -i 's/group = www-data/group = laravel/g' /usr/local/etc/php-fpm.d/www.conf
 
 # Set working directory
 WORKDIR /var/www/html

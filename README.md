@@ -85,6 +85,16 @@ docker compose down
 
 The PHP-FPM container runs as a user matching your host system's user ID to avoid file permission issues. By default, it uses UID/GID 1000.
 
+### Platform-Specific Notes
+
+- **Linux**: Works as designed. Files created in container match host user ownership.
+- **Mac**: Docker Desktop automatically handles file permissions. The UID/GID mapping is unnecessary but harmless.
+- **Windows**: File permissions work differently depending on your setup:
+  - WSL2 with Linux filesystem: Works like Linux
+  - WSL2 with Windows filesystem: Permissions may be ignored (files appear as 777)
+
+### Configuration
+
 To configure for your specific user:
 
 1. Check your user ID:
@@ -105,7 +115,7 @@ To configure for your specific user:
    docker compose up -d
    ```
 
-Files created inside the container will now be owned by your host user, allowing seamless editing without permission problems.
+On Linux, files created inside the container will be owned by your host user. On Mac/Windows, default Docker Desktop behavior typically handles permissions automatically.
 
 ## Environment Variables
 
