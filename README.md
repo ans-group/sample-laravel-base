@@ -9,6 +9,7 @@ This is a containerized Laravel application running on:
 - **NGINX** (latest) as a reverse proxy with static file caching
 - **MySQL 8.0** for database with performance tuning
 - **Redis 7** for caching, sessions, and queues with persistence
+- **Multi-stage Docker build** for optimized image size and security
 
 ## Quick Start
 
@@ -350,7 +351,7 @@ docker compose exec mysql mysqladmin -uroot -proot status
 1. **Remove development tools:**
    - Composer dev dependencies
    - Debug mode disabled
-   
+
 2. **Security:**
    - Use secrets management for credentials
    - Enable HTTPS with SSL certificates
@@ -376,6 +377,30 @@ docker compose exec mysql mysqladmin -uroot -proot status
    - Use external database (RDS, Cloud SQL)
    - Use managed Redis (ElastiCache, MemoryStore)
    - Implement load balancing
+
+## Multi-Stage Docker Build
+
+The PHP container uses a multi-stage build for optimal image size and security:
+
+**Builder Stage:**
+- Installs all build tools (g++, git, etc.)
+- Compiles PHP extensions
+- Runs Composer with optimization flags
+- Generates optimized autoloader
+
+**Runtime Stage:**
+- Contains only production dependencies
+- No build tools (smaller attack surface)
+- Copies compiled extensions from builder
+- Copies optimized application code
+
+**Benefits:**
+- Smaller final image (excludes build tools)
+- Faster deployment (optimized layers)
+- Better security (minimal runtime dependencies)
+- Optimized Composer autoloader
+
+Image size: ~630MB (includes PHP 8.4, all extensions, Laravel, dependencies)
 
 ## Resource Limits
 
