@@ -1,88 +1,112 @@
-# sample-laravel-base
-A sample of a base install of Laravel
+# Laravel Docker Development Environment
 
-## Environment Stack
-- **NGINX**: Latest (Web Server)
-- **PHP**: 8.4-FPM
-- **MySQL**: 8.0
-- **Redis**: 7 Alpine
+> **Note**: This is an AI-generated development environment created for interview purposes. It provides a quick setup for Laravel development using Docker.
+
+## Overview
+
+This is a containerized Laravel application running on:
+- **PHP 8.4-FPM** with extensions (MySQL, Redis, Xdebug, BCMath, GD, Zip, Intl)
+- **NGINX** (latest) as a reverse proxy
+- **MySQL 8.0** for database
+- **Redis 7** for caching, sessions, and queues
 
 ## Quick Start
 
-1. **Build and start the containers:**
+1. **Start the environment:**
    ```bash
-   docker-compose up -d --build
+   docker compose up -d
    ```
 
-2. **Copy environment file:**
+2. **Install dependencies (if needed):**
+   ```bash
+   docker compose exec app composer install
+   ```
+
+3. **Set up environment:**
    ```bash
    cp .env.example .env
+   docker compose exec app php artisan key:generate
    ```
 
-3. **Install Laravel dependencies (if needed):**
+4. **Run migrations:**
    ```bash
-   docker-compose exec app composer install
+   docker compose exec app php artisan migrate
    ```
 
-4. **Generate application key:**
-   ```bash
-   docker-compose exec app php artisan key:generate
-   ```
+5. **Access the application:**
+   - Web: http://localhost:8080
 
-5. **Run migrations:**
-   ```bash
-   docker-compose exec app php artisan migrate
-   ```
+## Architecture
 
-## Services Access
+### Services
 
-- **Application**: http://localhost
-- **MySQL**: localhost:3306
-  - Database: `laravel`
-  - Username: `laravel`
-  - Password: `secret`
-  - Root Password: `root`
-- **Redis**: localhost:6379
+- **nginx**: Reverse proxy on port 8080 (only service exposed to host)
+- **app**: PHP 8.4-FPM application container
+- **mysql**: MySQL 8.0 database (internal only)
+- **redis**: Redis 7 cache/session store (internal only)
 
-## Useful Commands
+### Security
+
+Only NGINX is exposed to the local network on port 8080. MySQL and Redis are accessible only from within the Docker network for security.
+
+### Configuration
+
+- NGINX config: `.docker/nginx/nginx.conf`
+- PHP config: `.docker/php/php.ini`
+- Docker build: `Dockerfile`
+- Services: `docker-compose.yml`
+
+## Development Commands
 
 ```bash
-# Stop containers
-docker-compose down
-
-# View logs
-docker-compose logs -f
-
-# Access PHP container
-docker-compose exec app bash
-
-# Access MySQL
-docker-compose exec mysql mysql -u laravel -psecret laravel
-
-# Access Redis CLI
-docker-compose exec redis redis-cli
-
 # Run artisan commands
-docker-compose exec app php artisan [command]
+docker compose exec app php artisan [command]
+
+# Run composer
+docker compose exec app composer [command]
 
 # Run tests
-docker-compose exec app php artisan test
+docker compose exec app ./vendor/bin/phpunit
+
+# Access MySQL
+docker compose exec mysql mysql -ularavel -psecret laravel
+
+# Access Redis CLI
+docker compose exec redis redis-cli
+
+# View logs
+docker compose logs -f [service]
+
+# Stop containers
+docker compose down
 ```
 
-## Directory Structure
+## Environment Variables
 
+Key Docker-specific settings in `.env`:
+
+```env
+APP_URL=http://localhost:8080
+
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=laravel
+DB_USERNAME=laravel
+DB_PASSWORD=secret
+
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+SESSION_DRIVER=redis
+CACHE_STORE=redis
+QUEUE_CONNECTION=redis
 ```
-.docker/
-├── nginx/
-│   └── nginx.conf       # NGINX configuration
-└── php/
-    └── php.ini          # PHP configuration
-```
 
-## Features
+## Xdebug
 
-- PHP 8.4 with FPM
-- Pre-installed PHP extensions: PDO MySQL, Redis, OPcache, Intl, Zip, GD, BCMath
-- Xdebug configured for debugging
-- Persistent MySQL and Redis data volumes
-- Optimized NGINX configuration for Laravel
+Xdebug is installed and configured to connect to `host.docker.internal:9003`. Configure your IDE to listen on port 9003 for debugging.
+
+## License
+
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
