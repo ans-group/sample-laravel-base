@@ -35,8 +35,6 @@ services:
       - ./.docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
       - ./.docker/php/www.conf:/usr/local/etc/php-fpm.d/zzz-custom.conf
       - ./storage/logs:/var/www/html/storage/logs
-    env_file:
-      - .env
     depends_on:
       mysql:
         condition: service_healthy

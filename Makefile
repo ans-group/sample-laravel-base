@@ -61,7 +61,9 @@ clean:
 	rm -rf vendor node_modules
 
 # Fresh installation
-fresh: rebuild
+fresh:
+	cp .env.example .env
+	$(MAKE) rebuild
 	docker compose exec app composer install
 	docker compose exec app php artisan migrate:fresh --seed
 	docker compose exec app php artisan key:generate
