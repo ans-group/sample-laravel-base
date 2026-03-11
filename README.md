@@ -19,9 +19,6 @@ This is a containerized Laravel application running on:
 # View all available commands
 make help
 
-# Start the environment
-make up
-
 # Fresh installation
 make fresh
 ```
